@@ -8,6 +8,7 @@
 
 #import "BlePeripherals.h"
 
+#pragma mark Base BLE device(peripheral) classes
 @implementation BlePeripherals
 @synthesize targetAdvertisementNames, peripherals, characteristicsDict;
 
@@ -19,7 +20,9 @@
 
     [self.targetAdvertisementNames addObjectsFromArray:@[@"MIO GLOBAL",
                                                          @"MIO GLOBAL LINK",
-                                                         @"CC2650 SensorTag"]];
+                                                         @"CC2650 SensorTag",
+                                                         @"TI BLE Sensor Tag",
+                                                         @"SensorTag"]];
 
 
     BlePeripheral *mio = [BlePeripheral new];
@@ -30,6 +33,12 @@
     [sensorTag.characteristics addObject:[SensorTagLux new]];
     [self.peripherals addObject:sensorTag];
 
+    
+    BlePeripheral *sensorTagV1 = [BlePeripheral new];
+    [sensorTagV1.characteristics addObject:[SensorTagIrTemperture new]];
+    [self.peripherals addObject:sensorTagV1];
+
+    
     
     self.characteristicsDict = [NSMutableDictionary new];
     for ( BlePeripheral *p in self.peripherals){
@@ -71,10 +80,13 @@
                      Service:(CBService *)service{
     return true;
 }
+- (double) calcData:(NSData *)data {
+    return 0.0;
+}
 
 @end
 
-#pragma device specific characteristics
+#pragma mark MioAlpha of generic heart rate pulse bpm charasteristic class
 @implementation MioAlphaPulse
 
 -(id) init{
@@ -101,21 +113,14 @@
 }
 @end;
 
-
-@implementation SensorTagLux
-- (id) init{
-    self = [super init];
-    self.name = @"sensor tag lux";
-    self.uuidString = @"F000AA71-0451-4000-B000-000000000000";
-    type = 2;
-}
+#pragma mark SensorTag specific base characteristic
+@implementation SensorTagCharacteristic
 
 - (bool) setupWithPeripheral:(CBPeripheral *)peripheral
                      Service:(CBService *)service{
-    NSString *toWriteUUID = @"F000AA72-0451-4000-B000-000000000000";
     for(CBCharacteristic *characteristic in service.characteristics) {
         CBUUID *uuid = [characteristic UUID];
-        if([uuid isEqual:[CBUUID UUIDWithString: toWriteUUID]]){
+        if([uuid isEqual:[CBUUID UUIDWithString: configUuidString]]){
             uint8_t data = 0x01;
             [peripheral writeValue:[NSData dataWithBytes:&data length:1]
                  forCharacteristic:characteristic
@@ -124,6 +129,20 @@
         }
     }
     return true;
+}
+
+@end
+
+
+
+@implementation SensorTagLux
+- (id) init{
+    self = [super init];
+    self.name = @"sensor tag lux";
+    self.uuidString = @"F000AA71-0451-4000-B000-000000000000";
+    configUuidString = @"F000AA72-0451-4000-B000-000000000000";
+
+    type = 2;
 }
 
 - (double) calcData: (NSData *)data{
@@ -144,5 +163,70 @@
 //    NSLog(@"lux: %f", output/100.0);
     return output / 100.0;
 }
+
+@end
+
+@implementation SensorTagIrTemperture
+- (id) init{
+    self = [super init];
+    self.name = @"sensor tag1 IR tempereture";
+    self.uuidString =  @"F000AA01-0451-4000-B000-000000000000";
+    configUuidString = @"F000AA02-0451-4000-B000-000000000000";
+    periodUuidString = @"F000AA03-0451-4000-B000-000000000000";
+
+    type = 2;
+}
+
+
+- (bool) setupWithPeripheral:(CBPeripheral *)peripheral
+                     Service:(CBService *)service{
+    for(CBCharacteristic *characteristic in service.characteristics) {
+        CBUUID *uuid = [characteristic UUID];
+        if([uuid isEqual:[CBUUID UUIDWithString: configUuidString]]){
+            uint8_t data = 0x01; // set on to this sensor
+            [peripheral writeValue:[NSData dataWithBytes:&data length:1]
+                 forCharacteristic:characteristic
+                              type:CBCharacteristicWriteWithResponse];
+        }
+        if([uuid isEqual:[CBUUID UUIDWithString: periodUuidString]]){
+            uint8_t data = 30; // setting updating period to 300ms
+            [peripheral writeValue:[NSData dataWithBytes:&data length:1]
+                 forCharacteristic:characteristic
+                              type:CBCharacteristicWriteWithResponse];
+        }
+    
+    }
+    return true;
+}
+
+- (double) calcData: (NSData *)data{
+    char scratchVal[data.length];
+    int16_t objTemp;
+    int16_t ambTemp;
+    [data getBytes:&scratchVal length:data.length];
+    objTemp = (scratchVal[0] & 0xff)| ((scratchVal[1] << 8) & 0xff00);
+    ambTemp = ((scratchVal[2] & 0xff)| ((scratchVal[3] << 8) & 0xff00));
+    
+    float temp = (float)((float)ambTemp / (float)128);
+    long double Vobj2 = (double)objTemp * .00000015625;
+    long double Tdie2 = (double)temp + 273.15;
+    long double S0 = 6.4*pow(10,-14);
+    long double a1 = 1.75*pow(10,-3);
+    long double a2 = -1.678*pow(10,-5);
+    long double b0 = -2.94*pow(10,-5);
+    long double b1 = -5.7*pow(10,-7);
+    long double b2 = 4.63*pow(10,-9);
+    long double c2 = 13.4f;
+    long double Tref = 298.15;
+    long double S = S0*(1+a1*(Tdie2 - Tref)+a2*pow((Tdie2 - Tref),2));
+    long double Vos = b0 + b1*(Tdie2 - Tref) + b2*pow((Tdie2 - Tref),2);
+    long double fObj = (Vobj2 - Vos) + c2*pow((Vobj2 - Vos),2);
+    long double Tobj = pow(pow(Tdie2,4) + (fObj/S),.25);
+    Tobj = (Tobj - 273.15);
+    //    return (double)Tobj;
+    return (double)Tobj * 1000;
+}
+
+
 
 @end

@@ -4,6 +4,27 @@
 #include "ofMain.h"
 #include "ofxBleSensorTag.h"
 
+#define HISTORY_MAX 10000
+
+class dataHistory{
+public:
+    double current, max, min;
+    deque<double> value_history;
+    void setCurrent(double value){
+        current = value;
+        if(max < value){
+            max = value;
+        }
+        if(min > value){
+            min = value;
+        }
+        value_history.push_front(value);
+        while( value_history.size() > HISTORY_MAX ){
+            value_history.pop_back();
+        }
+    }
+};
+
 class ofApp : public ofBaseApp{
 public:
     void setup();
@@ -28,6 +49,8 @@ private:
     bool bStartScan;
 
     vector<string> uuids;
+
+    vector<dataHistory> history;
     
     int nTag;
     double lux[16];
