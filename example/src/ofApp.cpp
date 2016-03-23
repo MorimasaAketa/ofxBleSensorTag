@@ -15,6 +15,10 @@ void ofApp::setup(){
 //    uuids.push_back("C80EC239-EDDE-4DC8-95DC-02AD0B221B81"); // CC2650 SensorTag v2.0
     uuids.push_back("2FA9F3D7-39C6-446B-88FB-C6CDC4612EB5"); // SensorTag v1.0
     uuids.push_back("0F1D1580-2439-405A-BDF5-AB6B98B79851"); // SensorTag v1.0
+    uuids.push_back("98140828-BB86-482B-81A3-5AE0A6A9F41F"); // SensorTag v1.0
+    uuids.push_back("2D4245FC-7572-4E80-813B-728B6B47DD57"); // SensorTag v1.0
+
+    
     for(int i = 0; i < uuids.size(); i++) {
         ble.addDeviceUUID(uuids[i]);
     }
@@ -39,7 +43,7 @@ void ofApp::update(){
     for(int i=0; i< nTag; i++ ){
         if(ble.isConnectedToDevice(uuids[i])) {
             timeLastScanned = ofGetElapsedTimef();
-            vector<int> hbs = ble.getLatestHeartBeatsFromDevice(uuids[i]);
+            vector<double> hbs = ble.getLatestValuesFromDevice(uuids[i]);
             if(hbs.size()) {
                 ofLogNotice() << "from " << uuids[i];
                 for(auto hb : hbs) {
@@ -68,7 +72,7 @@ void ofApp::draw(){
             }
             ofSetColor( ofMap(history[i].value_history[j],
                               history[i].min, history[i].max + 0.1, 0, 255) );
-            ofRect((ofGetHeight()/nTag)*i, j, ofGetWidth()/nTag, 1);
+            ofRect((ofGetWidth()/nTag)*i, j, ofGetWidth()/nTag, 1);
             /*
              int start_index = history[i].value_history.size() - ofGetHeight();
             if(start_index < 0 ){
@@ -120,6 +124,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
+    
 
 }
 

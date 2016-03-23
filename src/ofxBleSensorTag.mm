@@ -30,7 +30,7 @@ void ofxBleSensorTag::setup(ofxBleSensorTagInterface *interface) {
 
 void ofxBleSensorTag::addDeviceUUID(const string &uuid) {
     deviceConnectionInfos.insert(map<string, bool>::value_type(uuid, false));
-    latestHeartRates.insert(map<string, vector<int> >::value_type(uuid, vector<int>()));
+    latestValues.insert(map<string, vector<double> >::value_type(uuid, vector<double>()));
     NSString *uuidStr = [NSString stringWithCString:uuid.c_str()
                                            encoding:NSUTF8StringEncoding];
     [[BluetoothManager sharedManager] addTargetUUID:uuidStr];
@@ -50,10 +50,9 @@ void ofxBleSensorTag::disconnect() {
 
 #pragma mark getter
 
-vector<int> ofxBleSensorTag::getLatestHeartBeatsFromDevice(const string &uuid) {
-    vector<int> results = latestHeartRates[uuid];
-    latestHeartRates[uuid].clear();
-    
+vector<double> ofxBleSensorTag::getLatestValuesFromDevice(const string &uuid) {
+    vector<double> results = latestValues[uuid];
+    latestValues[uuid].clear();
     return results;
 }
 
@@ -84,10 +83,9 @@ void ofxBleSensorTag::findDevice(const string &uuid, bool isInTarget) {
     }
 }
 
-void ofxBleSensorTag::receiveValue(const string &uuid, double value,int  type) {
-    latestHeartRates[uuid].push_back((int)value);
-    
-    if(interface) interface->receiveValue(uuid, value, type);
+void ofxBleSensorTag::receiveValue(const string &uuid, double value, int  type) {
+    latestValues[uuid].push_back(value);
+        if(interface) interface->receiveValue(uuid, value, type);
 }
 
 void ofxBleSensorTag::updateConnectionState(const string &uuid, bool isConnected) {

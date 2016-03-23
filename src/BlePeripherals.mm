@@ -92,7 +92,7 @@
 -(id) init{
     self = [super init];
     self.name = @"mio alpha pluse";
-    self.uuidString = @"2A37";
+    self.uuidString = @"2A37"; // characteristic uuid
     type = 1;
 }
 
@@ -160,7 +160,7 @@
     exponent = (int)(lux >> 12) & 0xff;
     magnitude = pow(2.0, (double)exponent);
     output =  (double)mantissa * magnitude;
-//    NSLog(@"lux: %f", output/100.0);
+   NSLog(@"lux: %f", output/100.0);
     return output / 100.0;
 }
 
@@ -223,8 +223,9 @@
     long double fObj = (Vobj2 - Vos) + c2*pow((Vobj2 - Vos),2);
     long double Tobj = pow(pow(Tdie2,4) + (fObj/S),.25);
     Tobj = (Tobj - 273.15);
-    //    return (double)Tobj;
-    return (double)Tobj * 1000;
+    NSLog(@"IR: %f", (double)Tobj);
+    return (double)Tobj;
+//    return (double)Tobj * 1000;
 }
 
 

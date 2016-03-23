@@ -11,8 +11,8 @@ An openFrameworks Addon to connect to Texus Instruments SensorTag.
 
 ## How to use
 
-1. Generate Project with oF Project Generator, adding including this Addon.
-2. Add CoreBluetooth.framework to the XCode Project.
+1. Generate Project with oF Project Generator, including this Addon.
+2. Add CoreBluetooth.framework to your XCode Project.
 3. Define your SensorTag's identifire(UUID) in ofApp.cpp
 
 ## API
@@ -22,15 +22,19 @@ An openFrameworks Addon to connect to Texus Instruments SensorTag.
 
 ## BLE device configure
 
-Objective-C classes in BlePeripherals.mm has functions which contain device-specific information and procedure; BLE peripheral name, chracteristics UUID, algorithm to calculate raw sensor data to metrics.
+Objective-C classes in BlePeripherals.mm has functions which contain device-specific information and procedure; BLE peripheral name, chracteristics UUID, algorithm to calculate raw sensor data to physical units.
 
 
 ## Update history
 
 ### ver 0.01 [beta] release
 
-Can read only lux value from CC2650 SensorTag.
+Can read only light value in lux from CC2650 SensorTag.
 Also can read Mio Alpha's heartrate bpm value.
+
+### ver 0.02 [beta] release
+
+Add support for SensorTag V1's IR temperture sensor, configuring update period to 300ms, max speed of the sensor.
 
 ## License
 

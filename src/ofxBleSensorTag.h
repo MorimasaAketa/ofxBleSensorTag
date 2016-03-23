@@ -21,7 +21,8 @@ public:
     void stopScan();
     void disconnect();
     
-    vector<int> getLatestHeartBeatsFromDevice(const string &uuid);
+    //    vector<int> getLatestHeartBeatsFromDevice(const string &uuid);
+    vector<double> getLatestValuesFromDevice(const string &uuid);
     bool isConnectedToDevice(const string &uuid) const;
     
     const vector<string> &getConnectedDeviceUUIDs() const;
@@ -33,8 +34,11 @@ public:
     
 private:
     map<string, bool> deviceConnectionInfos;
-    map<string, vector<int> > latestHeartRates;
-    
+
+    //    map<string, vector<int> > latestHeartRates;
+    //    map<string, vector<double> > latestValues;
+    map<string, vector<double> > latestValues;
+
     vector<string> connectedDeviceUUIDs;
     vector<string> unknownDeviceUUIDs;
     

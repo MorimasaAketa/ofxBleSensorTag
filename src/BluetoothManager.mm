@@ -131,6 +131,20 @@ static BluetoothManager *sharedManager = nil;
                                                                    userInfo:userInfo];
         [[NSNotificationCenter defaultCenter] postNotification:notification];
     }
+     //  Asakusa Giken BLECAST_BL light sensor
+//    NSLog(@"p name: %@", peripheral.name);
+    if ( [peripheral.name isEqualToString:@"BLECAST_BL"] ) {
+        NSData *mfData = [advertisementData objectForKey:CBAdvertisementDataManufacturerDataKey];
+        const unsigned char *mData = (const unsigned char*)[ mfData bytes ];
+        unsigned long length = [mfData length];
+        int sensorData = 0;
+//        NSLog(@"len:%d",length );
+        if(length >= 6){
+            sensorData = mData[4] +  mData[5] * 256;
+            NSLog(@"BLECAST_BL lux: %d", sensorData);
+        }
+        
+    }
 }
 
 - (void)centralManager:(CBCentralManager *)central
@@ -221,7 +235,7 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
     CBUUID *uuid = [characteristic UUID];
     if( BleCharacteristic *localCharacteristic = [knownPeripherls findCharacteristicForUUID:[uuid UUIDString]]){
         double sensorValue = [localCharacteristic calcData:data];
-//        NSLog(@"value: %f", sensorValue);
+//       NSLog(@"value: %f", sensorValue);
         NSString *puuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
         NSDictionary *info = @{ BMValueKey : @(sensorValue),
                                 BMSensorTypeKey : @(localCharacteristic.type),
