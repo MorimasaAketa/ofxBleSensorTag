@@ -6,11 +6,28 @@
 
 #define HISTORY_MAX 10000
 
+struct timedDouble{
+    uint64_t    elapsedTime;
+    double value;
+};
+
 class dataHistory{
+
 public:
     double current, max, min;
-    deque<double> value_history;
+    bool started;
+    uint64_t currentTimeMicros;
+//    deque<double> value_history;
+//    deque<uint64_t> time_history;
+    deque<timedDouble> value_history;
+    dataHistory(){
+        value_history.resize(0);
+        current = max = min = 0.0;
+        started = false;
+    }
+
     void setCurrent(double value){
+        started = true;
         current = value;
         if(max < value){
             max = value;
@@ -18,12 +35,21 @@ public:
         if(min > value){
             min = value;
         }
-        value_history.push_front(value);
+        timedDouble tb;
+        
+        tb.elapsedTime = ofGetElapsedTimeMicros();
+        currentTimeMicros = tb.elapsedTime;
+        
+        tb.value = value;
+        value_history.push_front(tb);
+
         while( value_history.size() > HISTORY_MAX ){
             value_history.pop_back();
         }
     }
 };
+
+
 
 class ofApp : public ofBaseApp{
 public:
@@ -49,8 +75,7 @@ private:
     bool bStartScan;
 
     vector<string> uuids;
-
-    vector<dataHistory> history;
+    map<string,dataHistory> history;
     
     int nTag;
     double lux[16];

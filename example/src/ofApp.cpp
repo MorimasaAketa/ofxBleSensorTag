@@ -25,7 +25,11 @@ void ofApp::setup(){
     
     bStartScan = ble.startScan();
     nTag = uuids.size();
-    history.resize(nTag);
+    
+    for( vector<string>::iterator ite = uuids.begin(); ite != uuids.end(); ++ite){
+        dataHistory dh;
+        history.insert(map<string, dataHistory>::value_type(*ite, dh));
+    }
 
     timeLastBeated = 0.0;
     timeLastScanned = 0.0;
@@ -39,16 +43,31 @@ void ofApp::update(){
     if(!bStartScan) {
         bStartScan = ble.startScan();
     }
-    
+
+    uint64_t before = 0;
     for(int i=0; i< nTag; i++ ){
         if(ble.isConnectedToDevice(uuids[i])) {
             timeLastScanned = ofGetElapsedTimef();
-            vector<double> hbs = ble.getLatestValuesFromDevice(uuids[i]);
-            if(hbs.size()) {
-                ofLogNotice() << "from " << uuids[i];
-                for(auto hb : hbs) {
-                    ofLogNotice() << "IR temperture " << hb;
-                    history[i].setCurrent(hb);
+            vector<double> values = ble.getLatestValuesFromDevice(uuids[i]);
+
+            if(values.size()) {
+                //                ofLogNotice() << "from " << uuids[i];
+                for(auto value : values) {
+                    uint64_t last = 0;
+                    if( history[uuids[i]].started){
+                        last = history[uuids[i]].currentTimeMicros;
+                    }
+                    //                    ofLogNotice() << "IR temperture " << value;
+                    history[uuids[i]].setCurrent(value);
+                    
+                    uint64_t interval
+                        =history[uuids[i]].value_history.front().elapsedTime - last;
+                    
+                    ofLogNotice() <<
+                    interval << " :  " <<
+                    history[uuids[i]].value_history.front().value;
+
+                    before = history[uuids[i]].value_history.front().elapsedTime;
                 }
             }else{
                 //            lux = 0.0;
@@ -62,17 +81,21 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(0);
     // Paints screen sensed max brightness as white.
-    
-    for (int i=0; i<nTag; i++) {
-        int history_size =  history[i].value_history.size();
+//
+    int nTag = uuids.size();
+    int i = 0;
+    for (vector<string>::iterator ite = uuids.begin(); ite != uuids.end(); ++ite) {
+        int history_size =  history[*ite].value_history.size();
 
         for(int j = 0; j < ofGetHeight(); j++){
             if( j >= history_size ){
                 break;
             }
-            ofSetColor( ofMap(history[i].value_history[j],
-                              history[i].min, history[i].max + 0.1, 0, 255) );
+            ofSetColor( ofMap(history[*ite].value_history[j].value,
+                              history[*ite].min, history[*ite].max + 0.1, 0, 255) );
             ofRect((ofGetWidth()/nTag)*i, j, ofGetWidth()/nTag, 1);
+
+            
             /*
              int start_index = history[i].value_history.size() - ofGetHeight();
             if(start_index < 0 ){
@@ -88,6 +111,7 @@ void ofApp::draw(){
 
 
         }
+        i++;
     }
     
 
