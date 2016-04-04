@@ -61,6 +61,9 @@ enum BPSensorType {
 @interface SensorTagIrTemperture: SensorTagCharacteristic
 @end;
 
+@interface SensorTagAmbientTemperture: SensorTagCharacteristic
+@end;
+
 #pragma mark Base BLE device(peripheral) classes
 @interface BlePeripherals: NSObject{
     NSMutableArray *peripherals;
@@ -78,4 +81,5 @@ enum BPSensorType {
     NSMutableArray *characteristics;
 }
 @property (nonatomic, retain) NSMutableArray *characteristics;
+-(id) init;
 @end

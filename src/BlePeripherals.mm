@@ -12,6 +12,8 @@
 @implementation BlePeripherals
 @synthesize targetAdvertisementNames, peripherals, characteristicsDict;
 
+
+
 - (id) init{
     self = [super init];
 
@@ -60,9 +62,9 @@
 -(id) init{
     self = [super init];
     self.characteristics = [[NSMutableArray alloc]init];
+    NSLog(@"characteristic made");
     return self;
 
-    
 }
 @end;
 
@@ -90,10 +92,12 @@
 @implementation MioAlphaPulse
 
 -(id) init{
+    NSLog(@"in MioAlphaPulse");
     self = [super init];
     self.name = @"mio alpha pluse";
     self.uuidString = @"2A37"; // characteristic uuid
     type = 1;
+    return self;
 }
 
 -(double) calcData: (NSData *) data{
@@ -143,6 +147,7 @@
     configUuidString = @"F000AA72-0451-4000-B000-000000000000";
 
     type = 2;
+    return self;
 }
 
 - (double) calcData: (NSData *)data{
@@ -175,6 +180,7 @@
     periodUuidString = @"F000AA03-0451-4000-B000-000000000000";
 
     type = 2;
+    return self;
 }
 
 
@@ -223,7 +229,7 @@
     long double fObj = (Vobj2 - Vos) + c2*pow((Vobj2 - Vos),2);
     long double Tobj = pow(pow(Tdie2,4) + (fObj/S),.25);
     Tobj = (Tobj - 273.15);
-    NSLog(@"IR: %f", (double)Tobj);
+//    NSLog(@"IR: %f", (double)Tobj);
     return (double)Tobj;
 //    return (double)Tobj * 1000;
 }
@@ -231,3 +237,19 @@
 
 
 @end
+
+
+
+@implementation SensorTagAmbientTemperture
+- (id) init{
+    self = [super init];
+    self.name = @"sensor tag1 IR tempereture";
+    self.uuidString =  @"F000AA21-0451-4000-B000-000000000000";
+    configUuidString = @"F000AA22-0451-4000-B000-000000000000";
+    periodUuidString = @"F000AA23-0451-4000-B000-000000000000";
+    
+    type = 2;
+    return self;
+}
+@end
+
