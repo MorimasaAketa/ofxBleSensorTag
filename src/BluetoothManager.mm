@@ -97,8 +97,7 @@ static BluetoothManager *sharedManager = nil;
      advertisementData:(NSDictionary *)advertisementData
                   RSSI:(NSNumber *)RSSI
 {
-    NSString *uuid = [[peripheral UUID] UUIDString];
-
+    NSString *uuid = [[peripheral identifier] UUIDString];
 //    NSString *uuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
     NSLog(@"peripheral: %@ RSSI: %@dB", [peripheral description], RSSI);
 //   NSLog(@"advertismentData: %@", [advertisementData description]);
@@ -155,7 +154,7 @@ static BluetoothManager *sharedManager = nil;
     NSLog(@"success to connect %@", peripheral);
     [peripheral discoverServices:nil];
     //    NSString *uuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
-    NSString *uuid = [[peripheral UUID] UUIDString];
+    NSString *uuid = [[peripheral identifier] UUIDString];
     NSNotification *notification = [NSNotification notificationWithName:BMBluetoothConnectedNotification
                                                                  object:nil
                                                                userInfo:@{BMDeviceKey:uuid}];
@@ -169,7 +168,7 @@ didDisconnectPeripheral:(CBPeripheral *)peripheral
     NSLog(@"disconnect from %@", peripheral);
     [self scan];
 //    NSString *uuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
-    NSString *uuid = [[peripheral UUID] UUIDString];
+    NSString *uuid = [[peripheral identifier] UUIDString];
 
     NSNotification *notification = [NSNotification notificationWithName:BMBluetoothDisconnectedNotification
                                                                  object:nil
@@ -183,7 +182,7 @@ didFailToConnectPeripheral:(CBPeripheral *)peripheral
 {
     NSLog(@"failure to connect... %@", error);
 //    NSString *uuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
-    NSString *uuid = [[peripheral UUID] UUIDString];
+    NSString *uuid = [[peripheral identifier] UUIDString];
     NSNotification *notification = [NSNotification notificationWithName:BMBluetoothDisconnectedNotification
                                                                  object:nil
                                                                userInfo:@{BMDeviceKey:uuid}];
@@ -243,7 +242,7 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
         double sensorValue = [localCharacteristic calcData:data];
 //       NSLog(@"value: %f", sensorValue);
         //        NSString *puuid = (NSString *)CFUUIDCreateString(NULL, [peripheral UUID]);
-        NSString *puuid = [[peripheral UUID] UUIDString];
+        NSString *puuid = [[peripheral identifier] UUIDString];
         NSDictionary *info = @{ BMValueKey : @(sensorValue),
                                 BMSensorTypeKey : @(localCharacteristic.type),
                                 BMDeviceKey: puuid};
